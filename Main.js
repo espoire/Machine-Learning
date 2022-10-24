@@ -1,6 +1,5 @@
 
 import { Network, xorTestConfig } from "./ann/Network.js";
-import "./overrides/JsExtensions.js";
 import { expose } from "./util/Util.js";
 
 expose('Network', Network);

@@ -1,7 +1,6 @@
 import { allSame, arrayEquals, fillFromFunction } from "../util/Array.js";
 import { hasAnyKeys } from "../util/Map.js";
 import Neuron from "./Neuron.js";
-import ProgrammaticInputNode from "./ProgrammaticInputNode.js";
 
 export const xorTestConfig = {
   inputs: 2,
@@ -27,14 +26,9 @@ export class Network {
    */
   constructor(config) {
     Network.validateConfig(config);
-    this.inputLayer = Network.generateInputLayer(config.inputs);
-    this.computeLayers = Network.generateComputeLayers(config);
-    this.outputLayer = this.computeLayers[this.computeLayers.length - 1];
 
-    this.layers = [
-      this.inputLayer,
-      ...this.computeLayers,
-    ];
+    this.inputs = config.inputs;
+    this.layers = Network.generateLayers(config);
   }
 
   static validateConfig(config) {
@@ -45,16 +39,7 @@ export class Network {
     // TODO, use existing Neuron.validateConfig() fn
   }
 
-  /**
-   * @param {number} numInputs 
-   */
-  static generateInputLayer(numInputs) {
-    const ret = Array(numInputs);
-    fillFromFunction(ret, () => new ProgrammaticInputNode());
-    return ret;
-  }
-
-  static generateComputeLayers(networkConfig) {
+  static generateLayers(networkConfig) {
     const ret = [];
     const defaults = {
       type: networkConfig.type || Network.defaults.type,
@@ -71,19 +56,15 @@ export class Network {
 
   run(...inputs) {
     if (inputs.length === 1 && Array.isArray(inputs[0])) inputs = inputs[0];
-    if (inputs.length !== this.inputLayer.length) {
+    if (inputs.length !== this.inputs) {
       throw new Error(
         'Must provide a number of inputs equal to the number of input nodes.\n' +
         `Provided ${inputs.length} inputs: ${inputs}\n` +
-        `Expected ${this.inputLayer.length} inputs.`
+        `Expected ${this.inputs} inputs.`
       );
     }
 
-    for (let i = 0; i < inputs.length; i++) {
-      this.inputLayer[i].setValue(inputs[i]);
-    }
-
-    let layerInputs = null;
+    let layerInputs = inputs;
     let layerOutputs;
 
     for (const layer of this.layers) {
@@ -103,11 +84,11 @@ export class Network {
 
   toConfig() {
     const ret = {
-      inputs: this.inputLayer.length,
+      inputs: this.inputs,
       layers: [],
     };
 
-    for (const layer of this.computeLayers) {
+    for (const layer of this.layers) {
       const layerConfig = layerToConfig(layer);
       ret.layers.push(layerConfig);
     }
