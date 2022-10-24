@@ -29,7 +29,7 @@ export default class Neuron {
         return total >= 0 ? 1 : 0;
 
       case Neuron.types.sigmoid:
-        return 0; // TODO
+        return 1 / (1 + Math.exp(-total));
       
       case Neuron.types.identity:
         return total;
