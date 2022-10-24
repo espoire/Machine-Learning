@@ -17,7 +17,9 @@
 }
 
 export function arraySum(arr) {
-  if (!Array.isArray(arr)) throw new Error('TODO');
+  if (!Array.isArray(arr)) {
+    throw new Error(`Argument to Array.arraySum must be an array. Provided: ${arr}`);
+  }
   
   let sum = 0;
   for (const element of arr) {
@@ -27,9 +29,9 @@ export function arraySum(arr) {
 }
 
 export function arrayMultiply(arr1, arr2) {
-  if (!Array.isArray(arr1)) throw new Error('TODO');
-  if (!Array.isArray(arr2)) throw new Error('TODO');
-  if (arr1.length !== arr2.length) throw new Error('TODO');
+  if (!Array.isArray(arr1)) throw new Error(`First argument to Array.arrayMultiply must be an array. Provided: ${arr1}`);
+  if (!Array.isArray(arr2)) throw new Error(`Second argument to Array.arrayMultiply must be an array. Provided: ${arr2}`);
+  if (arr1.length !== arr2.length) throw new Error(`Both array arguments to Array.arrayMultiply must have the same length. Lengths: ${arr1.length}, ${arr2.length}.`);
 
   const ret = [];
   for (let i = 0; i < arr1.length; i++) {
@@ -43,13 +45,15 @@ export function arrayMultiply(arr1, arr2) {
  * @returns 
  */
 export function allSame(arr) {
-  if (!Array.isArray(arr)) throw new Error('TODO');
+  if (!Array.isArray(arr)) {
+    throw new Error(`Argument to Array.allSame must be an array. Provided: ${arr}`);
+  }
   return arr.every((el) => el === arr[0]);
 }
 
 export function arrayEquals(arr1, arr2) {
-  if (!Array.isArray(arr1)) throw new Error('TODO');
-  if (!Array.isArray(arr2)) throw new Error('TODO');
+  if (!Array.isArray(arr1)) throw new Error(`First argument to Array.arrayEquals must be an array. Provided: ${arr1}`);
+  if (!Array.isArray(arr2)) throw new Error(`Second argument to Array.arrayEquals must be an array. Provided: ${arr2}`);
   if (arr1.length !== arr2.length) return false;
 
   for (let i = 0; i < arr1.length; i++) {
