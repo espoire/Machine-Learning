@@ -16,7 +16,7 @@ export const xorTestConfig = {
   ],
 };
 
-export class ProgrammaticInputNeuralNetwork {
+export class Network {
   static defaults = {
     type: Neuron.types.binary,
     bias: 1,
@@ -26,9 +26,9 @@ export class ProgrammaticInputNeuralNetwork {
    * @param {number[]} layerWidths 
    */
   constructor(config) {
-    ProgrammaticInputNeuralNetwork.validateConfig(config);
-    this.inputLayer = ProgrammaticInputNeuralNetwork.generateInputLayer(config.inputs);
-    this.computeLayers = ProgrammaticInputNeuralNetwork.generateComputeLayers(config);
+    Network.validateConfig(config);
+    this.inputLayer = Network.generateInputLayer(config.inputs);
+    this.computeLayers = Network.generateComputeLayers(config);
     this.outputLayer = this.computeLayers[this.computeLayers.length - 1];
 
     this.layers = [
@@ -57,8 +57,8 @@ export class ProgrammaticInputNeuralNetwork {
   static generateComputeLayers(networkConfig) {
     const ret = [];
     const defaults = {
-      type: networkConfig.type || ProgrammaticInputNeuralNetwork.defaults.type,
-      bias: networkConfig.bias || ProgrammaticInputNeuralNetwork.defaults.bias,
+      type: networkConfig.type || Network.defaults.type,
+      bias: networkConfig.bias || Network.defaults.bias,
     };
 
     for (let layerConfig of networkConfig.layers) {
@@ -115,7 +115,7 @@ export class ProgrammaticInputNeuralNetwork {
     if (allSame(ret.layers.map((layer) => layer.type))) {
       const type = ret.layers[0].type;
 
-      if (type !== ProgrammaticInputNeuralNetwork.defaults.type) {
+      if (type !== Network.defaults.type) {
         ret.type = type;
       }
 
@@ -126,7 +126,7 @@ export class ProgrammaticInputNeuralNetwork {
     if (allSame(ret.layers.map((layer) => layer.bias))) {
       const bias = ret.layers[0].bias;
 
-      if (bias !== ProgrammaticInputNeuralNetwork.defaults.bias) {
+      if (bias !== Network.defaults.bias) {
         ret.bias = bias;
       }
 

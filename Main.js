@@ -1,15 +1,15 @@
 
-import { ProgrammaticInputNeuralNetwork, xorTestConfig } from "./ann/Network.js";
+import { Network, xorTestConfig } from "./ann/Network.js";
 import "./overrides/JsExtensions.js";
 import { expose } from "./util/Util.js";
 
-expose('ProgrammaticInputNeuralNetwork', ProgrammaticInputNeuralNetwork);
-const network = new ProgrammaticInputNeuralNetwork(xorTestConfig);
+expose('Network', Network);
+const network = new Network(xorTestConfig);
 expose('network', network);
 
 console.log('\n');
-console.log('Instantiating ProgrammaticInputNeuralNetwork from config:')
-console.log(`new ProgrammaticInputNeuralNetwork(${JSON.stringify(xorTestConfig)})`);
+console.log('Instantiating Network from config:')
+console.log(`new Network(${JSON.stringify(xorTestConfig)})`);
 
 console.log('\n');
 console.log('Test: Should mimic an XOR gate. Expected outputs: 0, 1, 1, 0.');
