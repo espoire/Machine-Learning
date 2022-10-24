@@ -12,9 +12,7 @@ export const xorTestConfig = {
       [1, -1],
       [-1, 1],
     ],
-    [
-      [1, 1]
-    ],
+    [1, 1],
   ],
 };
 
@@ -187,7 +185,7 @@ export class Network {
 // Private helper functions.
 
 function layerToConfig(layer) {
-  const neuronConfigs = [];
+  let neuronConfigs = [];
 
   const layerDefaults = {};
   if (allSame(layer.map((neuron) => neuron.type))) {
@@ -199,6 +197,10 @@ function layerToConfig(layer) {
 
   for (const neuron of layer) {
     neuronConfigs.push(neuron.toConfig(layerDefaults));
+  }
+
+  if (neuronConfigs.length === 1) {
+    neuronConfigs = neuronConfigs[0];
   }
 
   if (hasAnyKeys(layerDefaults)) return {
