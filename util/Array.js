@@ -16,6 +16,10 @@
   return offset;
 }
 
+/**
+ * @param {number[]} arr 
+ * @returns {number} The sum of all elements in the array, or zero if the array is empty.
+ */
 export function arraySum(arr) {
   if (!Array.isArray(arr)) {
     throw new Error(`Argument to Array.arraySum must be an array. Provided: ${arr}`);
@@ -28,6 +32,12 @@ export function arraySum(arr) {
   return sum;
 }
 
+/** Performs memberwise multiplication of two arrays.
+ * 
+ * @param {number[]} arr1 
+ * @param {number[]} arr2 
+ * @returns {number[]} An array containing the memberwise products.
+ */
 export function arrayMultiply(arr1, arr2) {
   if (!Array.isArray(arr1)) throw new Error(`First argument to Array.arrayMultiply must be an array. Provided: ${arr1}`);
   if (!Array.isArray(arr2)) throw new Error(`Second argument to Array.arrayMultiply must be an array. Provided: ${arr2}`);
@@ -42,7 +52,7 @@ export function arrayMultiply(arr1, arr2) {
 
 /**
  * @param {any[]} arr 
- * @returns 
+ * @returns {boolean} True if every element of the input array is equal to every other element, and false otherwise.
  */
 export function allSame(arr) {
   if (!Array.isArray(arr)) {
@@ -51,6 +61,11 @@ export function allSame(arr) {
   return arr.every((el) => el === arr[0]);
 }
 
+/**
+ * @param {any[]} arr1 
+ * @param {any[]} arr2 
+ * @returns {boolean} True if the given arrays are pairwise equal, and false otherwise.
+ */
 export function arrayEquals(arr1, arr2) {
   if (!Array.isArray(arr1)) throw new Error(`First argument to Array.arrayEquals must be an array. Provided: ${arr1}`);
   if (!Array.isArray(arr2)) throw new Error(`Second argument to Array.arrayEquals must be an array. Provided: ${arr2}`);

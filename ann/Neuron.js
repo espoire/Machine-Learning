@@ -18,6 +18,10 @@ export default class Neuron {
     this.weights = weights;
   }
 
+  /**
+   * @param {number[]} inputs 
+   * @returns {number} The output of this Neuron for the given inputs.
+   */
   getActivation(inputs) {
     const total = arraySum(arrayMultiply(
       inputs,
@@ -39,7 +43,7 @@ export default class Neuron {
   }
 
   toConfig(defaults = {}) {
-    if (defaults.type && defaults.bias != null) {
+    if (defaults.type != null && defaults.bias != null) {
       return [...this.weights];
     }
 
