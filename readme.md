@@ -1,6 +1,6 @@
 # Machine-Learning
 
-This is a machine learning sandbox. I'm using it to learn about artificial neural netwroks, and build a JavaScript neural netwroks & machine learning library.
+This is a machine learning sandbox. I'm using it to learn about artificial neural netwroks, and build a JavaScript neural networks & machine learning library.
 
 To use:
 - Visit https://espoire.github.io/Machine-Learning/.
