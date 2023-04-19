@@ -14,10 +14,12 @@ export const xorTestConfig = {
     ],
     [1, 1],
   ],
+  type: Neuron.types.binary,
+  bias: 1,
 };
 
 export const networkDefaults = {
-  type: Neuron.types.binary,
+  type: Neuron.types.sigmoid,
   bias: 1,
 };
 
@@ -116,9 +118,19 @@ export class Network {
 
       layerInputs = layerOutputs;
     }
-
     if (layerOutputs.length === 1) return layerOutputs[0];
     return layerOutputs;
+  }
+
+  /**
+   * 
+   * @param  {...{
+   *   inputs: number[],
+   *   output: number,
+   * }} trainingData 
+   */
+  train(...trainingData) {
+    // TODO
   }
 
   /**
