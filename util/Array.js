@@ -77,3 +77,8 @@ export function arrayEquals(arr1, arr2) {
 
   return true;
 }
+
+export function ensureArray(maybeArray) {
+  if (!Array.isArray(maybeArray)) return [maybeArray];
+  return maybeArray;
+}

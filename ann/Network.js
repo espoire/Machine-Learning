@@ -1,4 +1,4 @@
-import { allSame, arrayEquals, fillFromFunction } from "../util/Array.js";
+import { allSame, arrayEquals, ensureArray, fillFromFunction } from "../util/Array.js";
 import { hasAnyKeys } from "../util/Map.js";
 import Neuron from "./Neuron.js";
 
@@ -125,12 +125,36 @@ export class Network {
   /**
    * 
    * @param  {...{
-   *   inputs: number[],
-   *   output: number,
+   *   inputs: number | number[],
+   *   output: number | number[],
    * }} trainingData 
    */
   train(...trainingData) {
     // TODO
+    // Evaluate cost function for given trainingDatum
+    //    Run the inputs, compare actual outputs to expected
+    const allCosts = [];
+    for (const training of trainingData) {
+      const actual = ensureArray(this.run(training.inputs));
+      const expected = ensureArray(training.inputs);
+
+      const costs = [];
+      for (let i = 0; i < actual.length; i++) {
+        const difference = actual[i] - expected[i];
+        const cost = Math.pow(difference, 2);
+        costs.push(cost);
+      }
+
+      allCosts.push(costs.length === 1 ? costs[0] : costs);
+    }
+
+    return allCosts;
+
+    // Evaluate cost gradient for each neuron's bias at the output layer
+    // Evaluate cost gradient for each neuron's input weights at the output layer
+    // Recurse & evaluate cost gradient for all prior layers
+    // Update weights & biases based on gradient data
+    // Batch multiple trainings to produce gradient average
   }
 
   /**
