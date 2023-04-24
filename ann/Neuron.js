@@ -19,27 +19,29 @@ export default class Neuron {
   }
 
   /**
-   * @param {number[]} inputs 
-   * @returns {number} The output of this Neuron for the given inputs.
+   * @param {number} total
+   * @returns {number} The output of this Neuron for the given total.
    */
-  getActivation(inputs) {
-    const total = arraySum(arrayMultiply(
-      inputs,
-      this.weights
-    )) - this.bias;
-
+  getActivation(total) {
     switch (this.type) {
       case Neuron.types.binary:
         return total >= 0 ? 1 : 0;
 
       case Neuron.types.sigmoid:
-        return 1 / (1 + Math.exp(-total));
+        return sigmoid(total);
       
       case Neuron.types.identity:
         return total;
     }
 
     throw new Error(`Unrecognized Neuron type: ${this.type}`);
+  }
+
+  getTotal(inputs) {
+    return arraySum(arrayMultiply(
+      inputs,
+      this.weights
+    )) + this.bias;
   }
 
   toConfig(defaults = {}) {
@@ -176,4 +178,13 @@ export default class Neuron {
       isValid: true,
     };
   }
+}
+
+export function sigmoid(x) {
+  return 1 / (1 + Math.exp(-x));
+}
+
+export function derivativeOfSigmoid(x) {
+  const σ = sigmoid(x);
+  return σ + (1 - σ);
 }

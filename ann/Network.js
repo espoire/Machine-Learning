@@ -1,6 +1,6 @@
-import { allSame, arrayEquals, ensureArray, fillFromFunction } from "../util/Array.js";
+import { allSame, arrayEquals, arrayMean, arrayMultiply, arrayScale, ensureArray, fillFromFunction } from "../util/Array.js";
 import { hasAnyKeys } from "../util/Map.js";
-import Neuron from "./Neuron.js";
+import Neuron, { derivativeOfSigmoid } from "./Neuron.js";
 
 // An example config, which configures
 // a 3-Neuron Network which mimics the
@@ -15,12 +15,12 @@ export const xorTestConfig = {
     [1, 1],
   ],
   type: Neuron.types.binary,
-  bias: 1,
+  bias: -1,
 };
 
 export const networkDefaults = {
   type: Neuron.types.sigmoid,
-  bias: 1,
+  bias: -1,
 };
 
 export class Network {
@@ -95,15 +95,8 @@ export class Network {
    *    One or more numbers from the output layer of this Network.
    *    If only one number is output, it will not be wrapped in an array.
    */
-  run(...inputs) {
-    if (inputs.length === 1 && Array.isArray(inputs[0])) inputs = inputs[0];
-    if (inputs.length !== this.inputs) {
-      throw new Error(
-        'Must provide a number of inputs equal to the number of input nodes.\n' +
-        `Provided ${inputs.length} inputs: ${inputs}\n` +
-        `Expected ${this.inputs} inputs.`
-      );
-    }
+  run(inputs) {
+    this.validateInputs(inputs);
 
     let layerInputs = inputs;
     let layerOutputs;
@@ -112,14 +105,65 @@ export class Network {
       layerOutputs = [];
 
       for (const neuron of layer) {
-        const neuronOutput = neuron.getActivation(layerInputs);
+        const neuronOutput = neuron.getActivation(neuron.getTotal(layerInputs));
         layerOutputs.push(neuronOutput);
       }
 
       layerInputs = layerOutputs;
     }
-    if (layerOutputs.length === 1) return layerOutputs[0];
+    
     return layerOutputs;
+  }
+
+  validateInputs(inputs) {
+    if (inputs.length !== this.inputs) {
+      throw new Error(
+        'Must provide a number of inputs equal to the number of input nodes.\n' +
+        `Provided ${inputs.length} inputs: ${inputs}\n` +
+        `Expected ${this.inputs} inputs.`
+      );
+    }
+  }
+
+  /** Runs a given input set through this Network to produce an output set.
+   * Additionally records & returns all of the internal Neurons' activations.
+   * 
+   * @param  {...number} inputs
+   *    Zero or more input numbers.
+   *    Count must match the number of inputs declared
+   *    in the config when this Network was instantiated.
+   * @returns {number | number[]}
+   *    One or more numbers from the output layer of this Network.
+   *    If only one number is output, it will not be wrapped in an array.
+   */
+  trainingRun(inputs) {
+    this.validateInputs(inputs);
+
+    let currentLayerInputs = inputs;
+    const allOutputs = [];
+    const inputTotals = [];
+
+    for (const layer of this.layers) {
+      const currentLayerOutputs = [];
+      const currentLayerInputTotals = [];
+
+      for (const neuron of layer) {
+        const total = neuron.getTotal(currentLayerInputs);
+        const neuronOutput = neuron.getActivation(total);
+
+        currentLayerInputTotals.push(total);
+        currentLayerOutputs.push(neuronOutput);
+      }
+
+      currentLayerInputs = currentLayerOutputs;
+      allOutputs.push(currentLayerOutputs);
+      inputTotals.push(currentLayerInputTotals);
+    }
+
+    return {
+      inputs: inputTotals,
+      outputs: allOutputs
+    };
   }
 
   /**
@@ -129,32 +173,128 @@ export class Network {
    *   output: number | number[],
    * }} trainingData 
    */
-  train(...trainingData) {
-    // TODO
-    // Evaluate cost function for given trainingDatum
-    //    Run the inputs, compare actual outputs to expected
-    const allCosts = [];
-    for (const training of trainingData) {
-      const actual = ensureArray(this.run(training.inputs));
-      const expected = ensureArray(training.inputs);
+  train(trainingData) {
+    let improvement = 1;
+    const pre = this.getCompositeError(trainingData);
 
-      const costs = [];
-      for (let i = 0; i < actual.length; i++) {
-        const difference = actual[i] - expected[i];
-        const cost = Math.pow(difference, 2);
-        costs.push(cost);
+    while(improvement > Number.EPSILON) {
+      const priorCompositeError = this.getCompositeError(trainingData);
+
+      const gradients = [];
+      for (const training of trainingData) {
+        const gradient = this.getGradient(training);
+        gradients.push(gradient);
       }
 
-      allCosts.push(costs.length === 1 ? costs[0] : costs);
+      this.update(gradients, priorCompositeError);
+      
+      const postCompositeError = this.getCompositeError(trainingData);
+      improvement = priorCompositeError - postCompositeError;
+      console.log(improvement);
     }
 
-    return allCosts;
+    const post = this.getCompositeError(trainingData);
+    console.log({ pre, post });
+  }
 
-    // Evaluate cost gradient for each neuron's bias at the output layer
-    // Evaluate cost gradient for each neuron's input weights at the output layer
-    // Recurse & evaluate cost gradient for all prior layers
-    // Update weights & biases based on gradient data
-    // Batch multiple trainings to produce gradient average
+  update(gradients, error) {
+    const step = error / 2;
+
+    for (let i = 0; i < this.layers.length; i++) {
+      const layer = this.layers[i];
+
+      for (let j = 0; j < layer.length; j++) {
+        const neuron = layer[j];
+
+        neuron.bias -= arrayMean(gradients.map(g => g[i][j].ΔErrorPerΔBias)) * step;
+
+        for (let k = 0; k < neuron.weights.length; k++) {
+          neuron.weights[k] -= arrayMean(gradients.map(g => g[i][j].ΔErrorPerΔWeights[k])) * step;
+        }
+      }
+    }
+  }
+
+  getCompositeError(trainingData) {
+    return arrayMean(trainingData.map(training => this.getError(training)));
+  }
+
+  getError(training) {
+    const actual = this.run(training.inputs);
+    const expected = training.outputs;
+
+    const costs = [];
+    for (let i = 0; i < actual.length; i++) {
+      const difference = actual[i] - expected[i];
+      const cost = Math.pow(difference, 2);
+      costs.push(cost);
+    }
+
+    return arrayMean(costs);
+  }
+
+  getGradient(training) {
+    const {inputs, outputs} = this.trainingRun(training.inputs);
+
+    const outputLayerIndex = this.layers.length - 1;
+    const outputLayer = this.layers[outputLayerIndex];
+    let ΔErrorPerΔOutputs = [];
+    for (let j = 0; j < outputLayer.length; j++) {
+      const actual = outputs[outputLayerIndex][j];
+      const expected = training.outputs[j];
+      const ΔErrorPerΔOutput = 2 * (actual - expected);
+      ΔErrorPerΔOutputs.push(ΔErrorPerΔOutput);
+    }
+
+    const gradient = [];
+    for (let i = this.layers.length - 1; i >= 0; i--) {
+      const layer = this.layers[i];
+      const prevLayer = this.layers[i-1] || training.inputs;
+
+      const ΔErrorPerΔInputsCollection = [];
+      const gradientLayer = [];
+      for (let j = 0; j < layer.length; j++) {
+        const neuron = layer[j];
+        const inputTotal = inputs[i][j];
+
+        const ΔErrorPerΔActivation = ΔErrorPerΔOutputs[j];
+        const ΔActivationPerΔInputTotal = derivativeOfSigmoid(inputTotal);
+        const ΔInputTotalPerΔBias = 1;
+
+        const ΔInputTotalPerΔWeights = [];
+        const ΔInputTotalPerΔInputs = [];
+        for (let k = 0; k < prevLayer.length; k++) {
+          const ΔInputTotalPerΔWeight = (outputs[i-1] || training.inputs)[k];
+          ΔInputTotalPerΔWeights.push(ΔInputTotalPerΔWeight);
+
+          const ΔInputTotalPerΔInput = neuron.weights[k];
+          ΔInputTotalPerΔInputs.push(ΔInputTotalPerΔInput);
+        }
+
+        const gradientElement = {
+          ΔErrorPerΔBias: ΔErrorPerΔActivation * ΔActivationPerΔInputTotal * ΔInputTotalPerΔBias,
+          ΔErrorPerΔWeights: arrayScale(ΔInputTotalPerΔWeights, ΔErrorPerΔActivation * ΔActivationPerΔInputTotal),
+        };
+        gradientLayer.push(gradientElement);
+
+        const ΔErrorPerΔInputs = arrayScale(ΔInputTotalPerΔInputs, ΔErrorPerΔActivation * ΔActivationPerΔInputTotal);
+        ΔErrorPerΔInputsCollection.push(ΔErrorPerΔInputs);
+      }
+
+      gradient.push(gradientLayer);
+
+      ΔErrorPerΔOutputs = [];
+      for (let k = 0; k < prevLayer.length; k++) {
+        let total = 0;
+        for (let j = 0; j < layer.length; j++) {
+          total += ΔErrorPerΔInputsCollection[j][k];
+        }
+        const mean = total / layer.length;
+        ΔErrorPerΔOutputs.push(mean);
+      }
+    }
+
+    return gradient.reverse();
   }
 
   /**

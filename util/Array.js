@@ -32,6 +32,10 @@ export function arraySum(arr) {
   return sum;
 }
 
+export function arrayMean(arr) {
+  return arraySum(arr) / arr.length;
+}
+
 /** Performs memberwise multiplication of two arrays.
  * 
  * @param {number[]} arr1 
@@ -48,6 +52,19 @@ export function arrayMultiply(arr1, arr2) {
     ret.push(arr1[i] * arr2[i]);
   }
   return ret;
+}
+
+/** Performs memberwise multiplication of two arrays.
+ * 
+ * @param {number[]} arr1
+ * @param {number} scalar 
+ * @returns {number[]} An array containing the memberwise products.
+ */
+export function arrayScale(arr, scalar) {
+  if (!Array.isArray(arr)) throw new Error(`First argument to Array.arrayScale must be an array. Provided: ${arr}`);
+  if (typeof scalar !== 'number') throw new Error(`Second argument to Array.arrayMultiply must be a number. Provided: ${scalar}`);
+
+  return arr.map(el => el * scalar);
 }
 
 /**
