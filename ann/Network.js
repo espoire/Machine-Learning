@@ -177,7 +177,8 @@ export class Network {
     let improvement = 1;
     const pre = this.getCompositeError(trainingData);
 
-    while(improvement > Number.EPSILON) {
+    let cycle = 0;
+    while(improvement > 1e-10) {
       const priorCompositeError = this.getCompositeError(trainingData);
 
       const gradients = [];
@@ -189,9 +190,13 @@ export class Network {
       this.update(gradients, priorCompositeError);
       
       const postCompositeError = this.getCompositeError(trainingData);
+      if (postCompositeError < 0.001) break;
       improvement = priorCompositeError - postCompositeError;
-      console.log(improvement);
+
+      cycle++;
     }
+
+    console.log(`Training completed in ${cycle} cycles.`);
 
     const post = this.getCompositeError(trainingData);
     console.log({ pre, post });

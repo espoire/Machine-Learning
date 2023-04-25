@@ -40,11 +40,6 @@ const trainingTestNetwork = new Network({
       [random(-1, 1), random(-1, 1)],
     ],
     [random(-1, 1), random(-1, 1)]
-    // [
-    //   [1, -1],
-    //   [-1, 1],
-    // ],
-    // [1, 1]
   ],
 });
 
@@ -53,7 +48,7 @@ console.log('Test: trainingTestNetwork.toJson() to expose weights for visual ins
 console.log('trainingTestNetwork.toJson(): ', trainingTestNetwork.toJson());
 
 console.log('\n');
-console.log('Test: Should be random nonsense. Desired outputs: 0, 1, 1, 0.');
+console.log('Test: Should be random nonsense. Desired outputs: 0, 1, 0, 1.');
 console.log('trainingTestNetwork.run([0, 0])', trainingTestNetwork.run([0, 0]));
 console.log('trainingTestNetwork.run([0, 1])', trainingTestNetwork.run([0, 1]));
 console.log('trainingTestNetwork.run([1, 0])', trainingTestNetwork.run([1, 0]));
@@ -65,13 +60,13 @@ console.log(
   trainingTestNetwork.train([
     { inputs: [0, 0], outputs: [0] },
     { inputs: [0, 1], outputs: [1] },
-    { inputs: [1, 0], outputs: [1] },
-    { inputs: [1, 1], outputs: [0] },
+    { inputs: [1, 0], outputs: [0] },
+    { inputs: [1, 1], outputs: [1] },
   ])
 );
 
 console.log('\n');
-console.log('Test: Should mimic an XOR gate. Expected outputs: 0, 1, 1, 0.');
+console.log('Test. Expected outputs: 0, 1, 0, 1.');
 console.log('trainingTestNetwork.run([0, 0])', trainingTestNetwork.run([0, 0]));
 console.log('trainingTestNetwork.run([0, 1])', trainingTestNetwork.run([0, 1]));
 console.log('trainingTestNetwork.run([1, 0])', trainingTestNetwork.run([1, 0]));
