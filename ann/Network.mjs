@@ -1,6 +1,6 @@
-import { allSame, arrayEquals, arrayMean, arrayMultiply, arrayScale, ensureArray, fillFromFunction } from "../util/Array.js";
-import { hasAnyKeys } from "../util/Map.js";
-import Neuron, { derivativeOfSigmoid } from "./Neuron.js";
+import { allSame, arrayEquals, arrayMean, arrayMultiply, arrayScale, ensureArray, fillFromFunction } from "../util/Array.mjs";
+import { hasAnyKeys } from "../util/Map.mjs";
+import Neuron, { derivativeOfSigmoid } from "./Neuron.mjs";
 
 // An example config, which configures
 // a 3-Neuron Network which mimics the

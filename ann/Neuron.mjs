@@ -1,4 +1,4 @@
-import { arrayMultiply, arraySum } from "../util/Array.js";
+import { arrayMultiply, arraySum } from "../util/Array.mjs";
 
 export default class Neuron {
   static types = {
