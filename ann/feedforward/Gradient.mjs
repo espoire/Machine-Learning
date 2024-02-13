@@ -14,7 +14,10 @@ import { Network } from "./Network.mjs";
  */
 export default function getGradient(network, training) {
   const { inputs, outputs } = network.trainingRun(training.inputs);
-    
+  
+  // Does not work; the changes between this and branch:master
+  // cause loss to INCREASE with training, not decrease.
+  // Probably a simple mistake. Needs debugging. TODO
   let ΔErrorPerΔOutputs = network.getOutputΔ(outputs, training.outputs);
 
   const gradient = Array(network.layers.length);
