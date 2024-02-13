@@ -32,6 +32,22 @@ export function arraySum(arr) {
   return sum;
 }
 
+/**
+ * @param {number[]} arr 
+ * @returns {number} The product of all elements in the array, or 1 if the array is empty.
+ */
+export function arrayProduct(arr) {
+  if (!Array.isArray(arr)) {
+    throw new Error(`Argument to Array.arrayProduct must be an array. Provided: ${arr}`);
+  }
+  
+  let product = 1;
+  for (const element of arr) {
+    product *= element;
+  }
+  return product;
+}
+
 export function arrayMean(arr) {
   return arraySum(arr) / arr.length;
 }
@@ -54,7 +70,7 @@ export function arrayMultiply(arr1, arr2) {
   return ret;
 }
 
-/** Performs memberwise multiplication of two arrays.
+/** Performs memberwise multiplication of an array by a constant scalar.
  * 
  * @param {number[]} arr1
  * @param {number} scalar 
@@ -62,9 +78,12 @@ export function arrayMultiply(arr1, arr2) {
  */
 export function arrayScale(arr, scalar) {
   if (!Array.isArray(arr)) throw new Error(`First argument to Array.arrayScale must be an array. Provided: ${arr}`);
-  if (typeof scalar !== 'number') throw new Error(`Second argument to Array.arrayMultiply must be a number. Provided: ${scalar}`);
+  if (typeof scalar !== 'number') throw new Error(`Second argument to Array.arrayScale must be a number. Provided: ${scalar}`);
 
-  return arr.map(el => el * scalar);
+  for (let i = 0; i < arr.length; i++) arr[i] *= scalar;
+  return arr;
+
+  // return arr.map(el => el * scalar);
 }
 
 /**
@@ -98,4 +117,18 @@ export function arrayEquals(arr1, arr2) {
 export function ensureArray(maybeArray) {
   if (!Array.isArray(maybeArray)) return [maybeArray];
   return maybeArray;
+}
+
+export function maxAt(array) {
+  let max = array[0];
+  let maxIndex = 0;
+
+  for (let i = 1; i < array.length; i++) {
+    if (array[i] > max) {
+      max = array[i];
+      maxIndex = i;
+    }
+  }
+
+  return maxIndex;
 }

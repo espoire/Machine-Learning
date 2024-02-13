@@ -1,14 +1,19 @@
-import { arrayMultiply, arraySum } from "../util/Array.mjs";
+import { fillFromFunction } from "../../util/Array.mjs";
+
+const eluAlpha = 1;
 
 export default class Neuron {
   static types = {
     binary: 'binary',
     sigmoid: 'sigmoid',
     identity: 'identity',
+    elu: 'elu',
+    relu: 'relu',
+    leakyRelu: 'leakyRelu',
   };
 
   /**
-   * @param {'binary' | 'sigmoid' | 'identity'} type 
+   * @param {'binary' | 'sigmoid' | 'identity' | 'elu'} type 
    * @param {number} bias 
    * @param {number[]} weights 
    */
@@ -16,6 +21,15 @@ export default class Neuron {
     this.type = type;
     this.bias = bias;
     this.weights = weights;
+  }
+
+  /**
+   * @param {number} inputs
+   * @param {number} mean
+   */
+  setInitialWeights(inputs, mean) {
+    this.weights = Array(inputs);
+    fillFromFunction(this.weights, () => 2 * Math.random() - 1 + mean);
   }
 
   /**
@@ -32,16 +46,57 @@ export default class Neuron {
       
       case Neuron.types.identity:
         return total;
+
+      case Neuron.types.elu:
+        return elu(total);
+
+      case Neuron.types.relu:
+        return relu(total);
+
+      case Neuron.types.leakyRelu:
+        return leakyRelu(total);
     }
 
     throw new Error(`Unrecognized Neuron type: ${this.type}`);
   }
 
+  getDerivativeAtTotal(inputTotal) {
+    switch (this.type) {
+      case Neuron.types.binary:
+        return 0; // TODO find some convenient false-derivative function that makes learning binary neurons actually work...
+
+      case Neuron.types.sigmoid:
+        return derivativeOfSigmoid(inputTotal);
+      
+      case Neuron.types.identity:
+        return 1;
+
+      case Neuron.types.elu:
+        return derivativeOfElu(inputTotal);
+
+      case Neuron.types.relu:
+        return derivativeOfRelu(inputTotal);
+
+      case Neuron.types.leakyRelu:
+        return derivativeOfLeakyRelu(inputTotal);
+    }
+
+    throw new Error(`Unrecognized Neuron type: ${this.type}`);
+  }
+
+  /**
+   * @param {number[]} inputs 
+   * @returns {number}
+   */
   getTotal(inputs) {
-    return arraySum(arrayMultiply(
-      inputs,
-      this.weights
-    )) + this.bias;
+    const weights = this.weights;
+
+    let total = this.bias;
+    for (let i = 0; i < weights.length; i++) {
+      total += inputs[i] * weights[i];
+    }
+
+    return total;
   }
 
   toConfig(defaults = {}) {
@@ -187,4 +242,34 @@ export function sigmoid(x) {
 export function derivativeOfSigmoid(x) {
   const σ = sigmoid(x);
   return σ + (1 - σ);
+}
+
+export function elu(x) {
+  const ret = x >= 0 ? x : (Math.exp(x) - 1) * eluAlpha;
+  return ret;
+}
+
+export function derivativeOfElu(x) {
+  const ret = x >= 0 ? 1 : (Math.exp(x) - 1) * eluAlpha;
+  return ret;
+}
+
+export function relu(x) {
+  const ret = Math.max(0, x);
+  return ret;
+}
+
+export function derivativeOfRelu(x) {
+  const ret = x >= 0 ? 1 : 0;
+  return ret;
+}
+
+export function leakyRelu(x) {
+  const ret = x >= 0 ? x : 0.01 * x;
+  return ret;
+}
+
+export function derivativeOfLeakyRelu(x) {
+  const ret = x >= 0 ? 1 : 0.01;
+  return ret;
 }

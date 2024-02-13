@@ -1,4 +1,4 @@
-import { Network, xorTestConfig } from "./ann/Network.mjs";
+import { Network, xorTestConfig } from "./ann/feedforward/Network.mjs";
 
 export default function test() {
   const xorNetwork = new Network(xorTestConfig);
