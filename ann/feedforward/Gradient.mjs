@@ -1,7 +1,5 @@
-import { arrayMean, arrayScale, fillFromFunction } from "../../util/Array.mjs";
+import { arrayScale, fillFromFunction } from "../../util/Array.mjs";
 import { Network } from "./Network.mjs";
-
-const ΔInputTotalPerΔBias = 1;
 
 /** 
  * @param {Network} network
@@ -17,7 +15,7 @@ const ΔInputTotalPerΔBias = 1;
 export default function getGradient(network, training) {
   const { inputs, outputs } = network.trainingRun(training.inputs);
     
-  let ΔErrorPerΔOutputs = getOutputΔ(network, outputs, training);
+  let ΔErrorPerΔOutputs = network.getOutputΔ(outputs, training.outputs);
 
   const gradient = Array(network.layers.length);
   for (let i = network.layers.length - 1; i >= 0; i--) {
@@ -36,21 +34,6 @@ export default function getGradient(network, training) {
   }
 
   return gradient;
-}
-
-function getOutputΔ(network, outputs, training) {
-  const outputLayerIndex = network.layers.length - 1;
-  const outputLayer = network.layers[outputLayerIndex];
-
-  let ΔErrorPerΔOutputs = Array(outputLayer.length);
-  for (let j = 0; j < outputLayer.length; j++) {
-    const actual = outputs[outputLayerIndex][j];
-    const expected = training.outputs[j];
-    const ΔErrorPerΔOutput = 2 * (actual - expected);
-    ΔErrorPerΔOutputs[j] = ΔErrorPerΔOutput;
-  }
-
-  return ΔErrorPerΔOutputs;
 }
 
 function innerLoop(layer, inputs, i, ΔErrorPerΔOutputs, prevLayer, outputs, training) {
@@ -72,7 +55,7 @@ function innerLoop(layer, inputs, i, ΔErrorPerΔOutputs, prevLayer, outputs, tr
       innerInnerLoop(prevLayer, outputs, i, training, neuron);
 
     gradientLayer[j] = {
-      ΔErrorPerΔBias: ΔErrorPerΔActivation * ΔActivationPerΔInputTotal * ΔInputTotalPerΔBias,
+      ΔErrorPerΔBias: ΔErrorPerΔActivation * ΔActivationPerΔInputTotal,
       ΔErrorPerΔWeights: arrayScale(ΔInputTotalPerΔWeights, ΔErrorPerΔActivation * ΔActivationPerΔInputTotal),
     };
 
