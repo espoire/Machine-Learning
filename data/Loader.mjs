@@ -31,7 +31,7 @@ export class IdxFileLoader {
         throw new Error(`Unsupported data type code: ${dataTypeCode}`);
     }
 
-    // Next bite is number of array dimensions.
+    // Next byte is number of array dimensions.
     const dimensions = bytes[3];
     assert(dimensions > 0);
 
